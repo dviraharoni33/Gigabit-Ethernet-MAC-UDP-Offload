@@ -31,41 +31,6 @@ The system is organized into a modular hierarchy controlled by the top-level wra
     * Handles the specific timing requirements of the RGMII standard.
     * Converts 8-bit internal data to 4-bit DDR external signals (and vice versa).
 
-mermaid
- graph TD
-    subgraph Ethernet_System [ethernet_top]
-        direction LR
-        
-        %% Clocks and Resets
-        CLK[clk_125m / rst_n] --- MAC_TX
-        CLK --- MAC_RX
-        
-        %% Transmit Path
-        subgraph TX_Path [Transmit Path]
-            User_TX[User Logic] -->|tx_data, tx_start| MAC_TX[eth_mac_tx]
-            MAC_TX -->|Generate CRC| CRC_GEN[crc32_gen]
-            CRC_GEN -->|CRC Result| MAC_TX
-            MAC_TX -->|8-bit data| RGMII_TX[rgmii_tx]
-            RGMII_TX -->|4-bit DDR| PHY_TX[To PHY]
-        end
-
-        %% Receive Path
-        subgraph RX_Path [Receive Path]
-            PHY_RX[From PHY] -->|4-bit DDR| RGMII_RX[rgmii_rx]
-            RGMII_RX -->|8-bit data| MAC_RX[eth_mac_rx]
-            MAC_RX -->|Check CRC| CRC_CHK[crc32_eth]
-            CRC_CHK -->|Valid/Error| MAC_RX
-            MAC_RX -->|rx_data, rx_valid| User_RX[User Logic]
-        end
-    end
-    
-    style Ethernet_System fill:#f9f9f9,stroke:#333,stroke-width:2px
-    style MAC_TX fill:#d4e1f5,stroke:#333
-    style MAC_RX fill:#d4e1f5,stroke:#333
-    style RGMII_TX fill:#e1f5d4,stroke:#333
-    style RGMII_RX fill:#e1f5d4,stroke:#333
-mermaid
-
 
 ## 3. Design Details
 
