@@ -17,19 +17,28 @@ The core logic handles the encapsulation and decapsulation of Ethernet frames, i
 
 ## 2. Architecture & Block Diagram
 
-The system is organized into a modular hierarchy controlled by the top-level wrapper:
+<img width="734" height="640" alt="דיאגרמת מלבנים" src="https://github.com/user-attachments/assets/d03e2f0f-7959-4f0c-90c1-40d2de7a92bf" />
 
-* **ethernet_top (Top Level):**
-    * Integrates the MAC TX/RX paths with the RGMII I/O logic.
-    * Manages the reset and clock distribution.
+The system is organized into a modular hierarchy controlled by the top-level wrapper, designed with strict **Clock Domain Crossing (CDC)** separation as shown in the diagram above:
 
-* **MAC Layer (eth_mac_tx / eth_mac_rx):**
-    * **TX:** Receives data from the user application, appends Preamble/SFD, calculates CRC, and formats the Ethernet frame.
-    * **RX:** Detects incoming frames, validates the CRC32, strips the header, and passes the payload to the user application.
+### Clock Domains (Color Coded)
+To ensure robust operation and prevent metastability, the design is split into two independent clock regions:
+* **Blue Region (TX Path):** Operates on the FPGA system clock (`clk_125m`). This logic drives the transmission data generation and CRC calculation.
+* **Green Region (RX Path):** Operates on the recovered PHY clock (`rgmii_rxc`). This logic is synchronized to the incoming network traffic.
 
-* **Physical Layer (rgmii_tx / rgmii_rx):**
-    * Handles the specific timing requirements of the RGMII standard.
-    * Converts 8-bit internal data to 4-bit DDR external signals (and vice versa).
+### Module Description
+
+* **ethernet_top (Top Level Wrapper)**
+    * Acts as the bridge between the **User Logic** and the external **Ethernet PHY**.
+    * Manages resets (`rst_n`) and signal distribution between the sub-modules.
+
+* **MAC Layer (`eth_mac_tx` / `eth_mac_rx`)**
+    * **TX Path:** Receives raw data from the user, encapsulates it into Ethernet frames (adds Preamble & SFD), calculates the Frame Check Sequence (CRC32), and handles the transmission state machine.
+    * **RX Path:** Monitors the line for incoming frames, detects the SFD, validates the data integrity using CRC32, strips the protocol headers, and passes the clean payload to the user.
+
+* **Physical Layer / RGMII (`rgmii_tx` / `rgmii_rx`)**
+    * Implements the **RGMII (Reduced Gigabit Media Independent Interface)** standard.
+    * **DDR Logic:** Converts 8-bit internal SDR data (Single Data Rate) into 4-bit external DDR signals (Double Data Rate) for transmission, and vice versa for reception.
 
 
 ## 3. Design Details
