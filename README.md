@@ -31,7 +31,8 @@ The system is organized into a modular hierarchy controlled by the top-level wra
     * Handles the specific timing requirements of the RGMII standard.
     * Converts 8-bit internal data to 4-bit DDR external signals (and vice versa).
 
-graph TD
+mermaid
+ graph TD
     subgraph Ethernet_System [ethernet_top]
         direction LR
         
@@ -63,6 +64,8 @@ graph TD
     style MAC_RX fill:#d4e1f5,stroke:#333
     style RGMII_TX fill:#e1f5d4,stroke:#333
     style RGMII_RX fill:#e1f5d4,stroke:#333
+mermaid
+
 
 ## 3. Design Details
 
